@@ -222,6 +222,7 @@ body{
     padding:10px 2px;
     font-size:10px;
     font-weight:bold;
+    cursor:pointer;
 }
 
 .rangeButtons button.active{
@@ -372,7 +373,9 @@ body{
     </div>
 
     <div class="nav">
-        <button class="active" onclick="showPage('home',this)">
+
+        <button class="active"
+                onclick="showPage('home',this)">
             HOME
         </button>
 
@@ -383,6 +386,7 @@ body{
         <button onclick="showPage('contact',this)">
             CONTACT
         </button>
+
     </div>
 
 
@@ -390,10 +394,15 @@ body{
     <div id="home" class="page active">
 
         <div class="todayBox">
-            <div class="todayDate" id="homeDate">
+
+            <div class="todayDate">
+
                 <span id="homeDateText"></span>
+
                 <span id="homeDayText"></span>
+
             </div>
+
         </div>
 
 
@@ -415,6 +424,7 @@ body{
             <table class="resultTable">
 
                 <tr>
+
                     <td class="resultLabel">
                         3 DIGIT
                     </td>
@@ -422,9 +432,11 @@ body{
                     <td class="resultValue" id="threeDigit">
                         428
                     </td>
+
                 </tr>
 
                 <tr>
+
                     <td class="resultLabel">
                         2 DIGIT
                     </td>
@@ -432,9 +444,11 @@ body{
                     <td class="resultValue" id="twoDigit">
                         28
                     </td>
+
                 </tr>
 
                 <tr>
+
                     <td class="resultLabel">
                         1 DIGIT
                     </td>
@@ -442,6 +456,7 @@ body{
                     <td class="resultValue" id="oneDigit">
                         8
                     </td>
+
                 </tr>
 
             </table>
@@ -551,6 +566,7 @@ body{
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 
 <script>
 
@@ -676,6 +692,7 @@ function formatDate(date){
         date.getFullYear();
 
     return day+"/"+month+"/"+year;
+
 }
 
 
@@ -703,7 +720,6 @@ document.getElementById("homeDateText").textContent =
 document.getElementById("homeDayText").textContent =
     formatDay(today);
 
-
 document.getElementById("selectedDate").textContent =
     todayString;
 
@@ -726,27 +742,38 @@ function selectTime(time){
 
 
     if(time === "11 AM"){
+
         document
             .getElementById("time11")
             .classList.add("active");
+
     }
 
+
     if(time === "1 PM"){
+
         document
             .getElementById("time1")
             .classList.add("active");
+
     }
 
+
     if(time === "5 PM"){
+
         document
             .getElementById("time5")
             .classList.add("active");
+
     }
 
+
     if(time === "7 PM"){
+
         document
             .getElementById("time7")
             .classList.add("active");
+
     }
 
 
@@ -788,9 +815,6 @@ function selectTime(time){
     }
 
 }
-
-
-selectTime("11 AM");
 
 
 function downloadResult(){
@@ -844,6 +868,12 @@ function downloadResult(){
 
         link.click();
 
+    }).catch(function(){
+
+        alert(
+            "Unable to create image. Please try again."
+        );
+
     });
 
 }
@@ -860,9 +890,15 @@ function showPage(pageId,button){
         });
 
 
-    document
-        .getElementById(pageId)
-        .classList.add("active");
+    const selectedPage =
+        document.getElementById(pageId);
+
+
+    if(selectedPage){
+
+        selectedPage.classList.add("active");
+
+    }
 
 
     document
@@ -874,7 +910,18 @@ function showPage(pageId,button){
         });
 
 
-    button.classList.add("active");
+    if(button){
+
+        button.classList.add("active");
+
+    }
+
+
+    if(pageId === "result"){
+
+        drawHistory();
+
+    }
 
 }
 
@@ -903,6 +950,13 @@ function drawHistory(){
         document.getElementById("historyBody");
 
 
+    if(!body){
+
+        return;
+
+    }
+
+
     body.innerHTML = "";
 
 
@@ -919,51 +973,57 @@ function drawHistory(){
     dates.forEach(function(date){
 
         const data =
-            TEST_DATA[date];
+            TEST_DATA[date] || {};
 
 
         const tr =
             document.createElement("tr");
 
 
-            const dateCell =
+        const dateCell =
             document.createElement("td");
+
 
         dateCell.textContent =
             date;
 
+
         tr.appendChild(dateCell);
 
 
-        ["11 AM","1 PM","5 PM","7 PM"].forEach(function(time){
+        ["11 AM","1 PM","5 PM","7 PM"]
+            .forEach(function(time){
 
-            const td =
-                document.createElement("td");
+                const td =
+                    document.createElement("td");
 
-            const value =
-                data[time] || "";
 
-            if(value){
+                const value =
+                    data[time] || "";
 
-                td.textContent =
-                    value;
 
-                td.className =
-                    "resultCell";
+                if(value){
 
-            }else{
+                    td.textContent =
+                        value;
 
-                td.textContent =
-                    "—";
+                    td.className =
+                        "resultCell";
 
-                td.className =
-                    "empty";
+                }else{
 
-            }
+                    td.textContent =
+                        "—";
 
-            tr.appendChild(td);
+                    td.className =
+                        "empty";
 
-        });
+                }
+
+
+                tr.appendChild(td);
+
+            });
 
 
         body.appendChild(tr);
@@ -987,7 +1047,11 @@ function setRange(range,button){
         });
 
 
-    button.classList.add("active");
+    if(button){
+
+        button.classList.add("active");
+
+    }
 
 
     drawHistory();
@@ -995,7 +1059,10 @@ function setRange(range,button){
 }
 
 
-/* INITIAL HISTORY LOAD */
+/* INITIAL LOAD */
+
+selectTime("11 AM");
+
 drawHistory();
 
 </script>
