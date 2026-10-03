@@ -926,4 +926,79 @@ function drawHistory(){
             document.createElement("tr");
 
 
-        const dateC
+            const dateCell =
+            document.createElement("td");
+
+        dateCell.textContent =
+            date;
+
+        tr.appendChild(dateCell);
+
+
+        ["11 AM","1 PM","5 PM","7 PM"].forEach(function(time){
+
+            const td =
+                document.createElement("td");
+
+            const value =
+                data[time] || "";
+
+            if(value){
+
+                td.textContent =
+                    value;
+
+                td.className =
+                    "resultCell";
+
+            }else{
+
+                td.textContent =
+                    "—";
+
+                td.className =
+                    "empty";
+
+            }
+
+            tr.appendChild(td);
+
+        });
+
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+
+function setRange(range,button){
+
+    currentRange = range;
+
+
+    document
+        .querySelectorAll(".rangeButtons button")
+        .forEach(function(btn){
+
+            btn.classList.remove("active");
+
+        });
+
+
+    button.classList.add("active");
+
+
+    drawHistory();
+
+}
+
+
+/* INITIAL HISTORY LOAD */
+drawHistory();
+
+</script>
+
+</body>
+</html>
