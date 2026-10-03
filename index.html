@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WIN LOT</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:15px;
+    font-family:Arial,sans-serif;
+    background:#102235;
+    color:#fff;
+}
+
+.container{
+    width:100%;
+    max-width:480px;
+    margin:auto;
+}
+
+/* WIN LOT LOGO */
+.logoArea{
+    text-align:center;
+    padding-top:22px;
+    padding-bottom:16px;
+}
+
+.logoIcon{
+    width:42px;
+    height:42px;
+    margin:0 auto 6px;
+    border:2px solid #ffffff;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#ffffff;
+    font-size:24px;
+    font-weight:bold;
+    line-height:1;
+    box-shadow:0 0 12px rgba(82,226,239,.45);
+}
+
+.logoText{
+    color:#ffffff;
+    font-size:30px;
+    font-weight:900;
+    letter-spacing:4px;
+    line-height:1;
+    text-shadow:0 0 10px rgba(82,226,239,.45);
+}
+
+.nav{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-bottom:15px;
+}
+
+.nav button{
+    border:1px solid #28566f;
+    background:#173149;
+    color:#fff;
+    border-radius:9px;
+    padding:11px 4px;
+    font-size:12px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.nav button.active{
+    background:#35cfe3;
+    color:#07121f;
+}
+
+.page{
+    display:none;
+}
+
+.page.active{
+    display:block;
+}
+
+.todayBox{
+    background:#173149;
+    border:1px solid #28566f;
+    border-radius:12px;
+    padding:14px;
+    text-align:center;
+    margin-bottom:15px;
+}
+
+.todayDate{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+    font-size:20px;
+    font-weight:bold;
+    color:#52e2ef;
+    white-space:nowrap;
+}
+
+.resultCard{
+    background:#173149;
+    border:1px solid #36738a;
+    border-radius:14px;
+    padding:20px 14px 22px;
+    box-shadow:0 5px 18px rgba(0,0,0,.18);
+    margin-bottom:18px;
+}
+
+.resultHeader{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:28px;
+    margin-bottom:20px;
+    flex-wrap:nowrap;
+}
+
+.resultTime,
+.resultDate{
+    margin:0;
+    font-size:22px;
+    font-weight:bold;
+    color:#52e2ef;
+    line-height:1;
+    white-space:nowrap;
+}
+
+.resultTable{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    overflow:hidden;
+    border:1px solid #36738a;
+    border-radius:10px;
+}
+
+.resultTable td{
+    height:82px;
+    border-bottom:1px solid #28566f;
+    text-align:center;
+    vertical-align:middle;
+}
+
+.resultTable tr:last-child td{
+    border-bottom:none;
+}
+
+.resultLabel{
+    width:50%;
+    font-size:14px;
+    font-weight:bold;
+    color:#fff;
+}
+
+.resultValue{
+    width:50%;
+    font-size:28px;
+    font-weight:bold;
+    color:#52e2ef;
+}
+
+.timeButtons{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    width:100%;
+    margin-bottom:12px;
+}
+
+.timeButtons button{
+    width:100%;
+    border:1px solid #28566f;
+    background:#173149;
+    color:#ffffff;
+    border-radius:9px;
+    padding:14px 4px;
+    font-size:13px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.timeButtons button.active{
+    background:#35cfe3;
+    color:#07121f;
+}
+
+.downloadResultBtn{
+    width:100%;
+    border:1px solid #35cfe3;
+    background:#35cfe3;
+    color:#07121f;
+    border-radius:9px;
+    padding:14px 8px;
+    font-size:13px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-bottom:18px;
+}
+
+.rangeButtons{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+    margin-bottom:12px;
+}
+
+.rangeButtons button{
+    border:1px solid #28566f;
+    background:#173149;
+    color:#fff;
+    border-radius:8px;
+    padding:10px 2px;
+    font-size:10px;
+    font-weight:bold;
+}
+
+.rangeButtons button.active{
+    background:#35cfe3;
+    color:#07121f;
+}
+
+.historyBox{
+    background:#173149;
+    border:1px solid #36738a;
+    border-radius:12px;
+    padding:6px;
+    overflow:hidden;
+}
+
+.historyTable{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+
+.historyTable th{
+    font-size:10px;
+    color:#52e2ef;
+    padding:9px 2px;
+    border-bottom:1px solid #28566f;
+}
+
+.historyTable td{
+    text-align:center;
+    font-size:11px;
+    padding:10px 2px;
+    border-bottom:1px solid #28566f;
+}
+
+.historyTable tr:last-child td{
+    border-bottom:none;
+}
+
+.resultCell{
+    color:#52e2ef;
+    font-weight:bold;
+}
+
+.empty{
+    color:#708797;
+}
+
+.contactBox{
+    background:#173149;
+    border:1px solid #36738a;
+    border-radius:12px;
+    padding:20px;
+    text-align:center;
+}
+
+.contactBox h3{
+    color:#52e2ef;
+    margin-top:0;
+}
+
+.contactBox p{
+    font-size:14px;
+    line-height:1.6;
+}
+
+@media(max-width:360px){
+
+    .container{
+        padding:0;
+    }
+
+    .logoArea{
+        padding-top:18px;
+        padding-bottom:14px;
+    }
+
+    .logoIcon{
+        width:38px;
+        height:38px;
+        font-size:21px;
+    }
+
+    .logoText{
+        font-size:27px;
+        letter-spacing:3px;
+    }
+
+    .todayDate{
+        gap:14px;
+        font-size:18px;
+    }
+
+    .resultHeader{
+        gap:18px;
+    }
+
+    .resultTime,
+    .resultDate{
+        font-size:19px;
+    }
+
+    .resultTable td{
+        height:76px;
+    }
+
+    .resultLabel{
+        font-size:12px;
+    }
+
+    .resultValue{
+        font-size:24px;
+    }
+
+    .timeButtons{
+        gap:8px;
+    }
+
+    .timeButtons button{
+        padding:13px 4px;
+        font-size:12px;
+    }
+
+    .historyBox{
+        padding:4px;
+    }
+
+    .historyTable th{
+        font-size:9px;
+        padding:8px 0;
+    }
+
+    .historyTable td{
+        font-size:10px;
+        padding:9px 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logoArea">
+        <div class="logoIcon">✦</div>
+        <div class="logoText">WIN LOT</div>
+    </div>
+
+    <div class="nav">
+        <button class="active" onclick="showPage('home',this)">
+            HOME
+        </button>
+
+        <button onclick="showPage('result',this)">
+            RESULT
+        </button>
+
+        <button onclick="showPage('contact',this)">
+            CONTACT
+        </button>
+    </div>
+
+
+    <!-- HOME -->
+    <div id="home" class="page active">
+
+        <div class="todayBox">
+            <div class="todayDate" id="homeDate">
+                <span id="homeDateText"></span>
+                <span id="homeDayText"></span>
+            </div>
+        </div>
+
+
+        <div class="resultCard" id="downloadArea">
+
+            <div class="resultHeader">
+
+                <div class="resultTime" id="selectedTime">
+                    11 AM
+                </div>
+
+                <div class="resultDate" id="selectedDate">
+                    03/10/2026
+                </div>
+
+            </div>
+
+
+            <table class="resultTable">
+
+                <tr>
+                    <td class="resultLabel">
+                        3 DIGIT
+                    </td>
+
+                    <td class="resultValue" id="threeDigit">
+                        428
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="resultLabel">
+                        2 DIGIT
+                    </td>
+
+                    <td class="resultValue" id="twoDigit">
+                        28
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="resultLabel">
+                        1 DIGIT
+                    </td>
+
+                    <td class="resultValue" id="oneDigit">
+                        8
+                    </td>
+                </tr>
+
+            </table>
+
+        </div>
+
+
+        <div class="timeButtons">
+
+            <button id="time11"
+                    onclick="selectTime('11 AM')">
+                11 AM
+            </button>
+
+            <button id="time1"
+                    onclick="selectTime('1 PM')">
+                1 PM
+            </button>
+
+            <button id="time5"
+                    onclick="selectTime('5 PM')">
+                5 PM
+            </button>
+
+            <button id="time7"
+                    onclick="selectTime('7 PM')">
+                7 PM
+            </button>
+
+        </div>
+
+
+        <button class="downloadResultBtn"
+                onclick="downloadResult()">
+            DOWNLOAD RESULT
+        </button>
+
+    </div>
+
+
+    <!-- RESULT -->
+    <div id="result" class="page">
+
+        <div class="rangeButtons">
+
+            <button class="active"
+                    onclick="setRange(5,this)">
+                5 DAYS
+            </button>
+
+            <button onclick="setRange(10,this)">
+                10 DAYS
+            </button>
+
+            <button onclick="setRange(15,this)">
+                15 DAYS
+            </button>
+
+            <button onclick="setRange(30,this)">
+                1 MONTH
+            </button>
+
+        </div>
+
+
+        <div class="historyBox">
+
+            <table class="historyTable">
+
+                <thead>
+
+                    <tr>
+                        <th>DATE</th>
+                        <th>11 AM</th>
+                        <th>1 PM</th>
+                        <th>5 PM</th>
+                        <th>7 PM</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="historyBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- CONTACT -->
+    <div id="contact" class="page">
+
+        <div class="contactBox">
+
+            <h3>CONTACT</h3>
+
+            <p>
+                For any enquiries, please contact us.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+
+const TEST_DATA = {
+
+    "03/10/2026":{
+        "11 AM":"428",
+        "1 PM":"315",
+        "5 PM":"672",
+        "7 PM":"901"
+    },
+
+    "02/10/2026":{
+        "11 AM":"123",
+        "1 PM":"456",
+        "5 PM":"",
+        "7 PM":"789"
+    },
+
+    "01/10/2026":{
+        "11 AM":"781",
+        "1 PM":"",
+        "5 PM":"234",
+        "7 PM":"890"
+    },
+
+    "30/09/2026":{
+        "11 AM":"345",
+        "1 PM":"678",
+        "5 PM":"901",
+        "7 PM":"234"
+    },
+
+    "29/09/2026":{
+        "11 AM":"512",
+        "1 PM":"347",
+        "5 PM":"826",
+        "7 PM":"109"
+    },
+
+    "28/09/2026":{
+        "11 AM":"690",
+        "1 PM":"214",
+        "5 PM":"735",
+        "7 PM":"468"
+    },
+
+    "27/09/2026":{
+        "11 AM":"157",
+        "1 PM":"803",
+        "5 PM":"426",
+        "7 PM":"591"
+    },
+
+    "26/09/2026":{
+        "11 AM":"934",
+        "1 PM":"562",
+        "5 PM":"178",
+        "7 PM":"340"
+    },
+
+    "25/09/2026":{
+        "11 AM":"246",
+        "1 PM":"719",
+        "5 PM":"503",
+        "7 PM":"864"
+    },
+
+    "24/09/2026":{
+        "11 AM":"381",
+        "1 PM":"625",
+        "5 PM":"947",
+        "7 PM":"210"
+    },
+
+    "23/09/2026":{
+        "11 AM":"704",
+        "1 PM":"138",
+        "5 PM":"592",
+        "7 PM":"463"
+    },
+
+    "22/09/2026":{
+        "11 AM":"829",
+        "1 PM":"351",
+        "5 PM":"640",
+        "7 PM":"275"
+    },
+
+    "21/09/2026":{
+        "11 AM":"416",
+        "1 PM":"982",
+        "5 PM":"307",
+        "7 PM":"651"
+    },
+
+    "20/09/2026":{
+        "11 AM":"573",
+        "1 PM":"240",
+        "5 PM":"816",
+        "7 PM":"394"
+    },
+
+    "19/09/2026":{
+        "11 AM":"168",
+        "1 PM":"537",
+        "5 PM":"429",
+        "7 PM":"780"
+    }
+
+};
+
+
+function formatDate(date){
+
+    const day =
+        String(date.getDate()).padStart(2,"0");
+
+    const month =
+        String(date.getMonth()+1).padStart(2,"0");
+
+    const year =
+        date.getFullYear();
+
+    return day+"/"+month+"/"+year;
+}
+
+
+function formatDay(date){
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            weekday:"long"
+        }
+    );
+
+}
+
+
+const today = new Date();
+
+const todayString =
+    formatDate(today);
+
+
+document.getElementById("homeDateText").textContent =
+    todayString;
+
+document.getElementById("homeDayText").textContent =
+    formatDay(today);
+
+
+document.getElementById("selectedDate").textContent =
+    todayString;
+
+
+let selectedTime = "11 AM";
+
+
+function selectTime(time){
+
+    selectedTime = time;
+
+
+    document
+        .querySelectorAll(".timeButtons button")
+        .forEach(function(btn){
+
+            btn.classList.remove("active");
+
+        });
+
+
+    if(time === "11 AM"){
+        document
+            .getElementById("time11")
+            .classList.add("active");
+    }
+
+    if(time === "1 PM"){
+        document
+            .getElementById("time1")
+            .classList.add("active");
+    }
+
+    if(time === "5 PM"){
+        document
+            .getElementById("time5")
+            .classList.add("active");
+    }
+
+    if(time === "7 PM"){
+        document
+            .getElementById("time7")
+            .classList.add("active");
+    }
+
+
+    document.getElementById("selectedTime").textContent =
+        time;
+
+    document.getElementById("selectedDate").textContent =
+        todayString;
+
+
+    const data =
+        TEST_DATA[todayString] || {};
+
+
+    const three =
+        data[time] || "—";
+
+
+    document.getElementById("threeDigit").textContent =
+        three;
+
+
+    if(three !== "—"){
+
+        document.getElementById("twoDigit").textContent =
+            three.slice(-2);
+
+        document.getElementById("oneDigit").textContent =
+            three.slice(-1);
+
+    }else{
+
+        document.getElementById("twoDigit").textContent =
+            "—";
+
+        document.getElementById("oneDigit").textContent =
+            "—";
+
+    }
+
+}
+
+
+selectTime("11 AM");
+
+
+function downloadResult(){
+
+    const resultArea =
+        document.getElementById("downloadArea");
+
+
+    if(typeof html2canvas === "undefined"){
+
+        alert(
+            "Download system is loading. Please try again."
+        );
+
+        return;
+
+    }
+
+
+    html2canvas(
+        resultArea,
+        {
+            backgroundColor:"#173149",
+            scale:2,
+            useCORS:true,
+            logging:false
+        }
+    ).then(function(canvas){
+
+        const link =
+            document.createElement("a");
+
+
+        const safeDate =
+            todayString.replace(/\//g,"-");
+
+
+        const safeTime =
+            selectedTime
+                .replace(/\s+/g,"-")
+                .toLowerCase();
+
+
+        link.download =
+            "WIN-LOT-"+safeDate+"-"+safeTime+".png";
+
+
+        link.href =
+            canvas.toDataURL("image/png");
+
+
+        link.click();
+
+    });
+
+}
+
+
+function showPage(pageId,button){
+
+    document
+        .querySelectorAll(".page")
+        .forEach(function(page){
+
+            page.classList.remove("active");
+
+        });
+
+
+    document
+        .getElementById(pageId)
+        .classList.add("active");
+
+
+    document
+        .querySelectorAll(".nav button")
+        .forEach(function(btn){
+
+            btn.classList.remove("active");
+
+        });
+
+
+    button.classList.add("active");
+
+}
+
+
+let currentRange = 5;
+
+
+function parseDate(dateString){
+
+    const parts =
+        dateString.split("/");
+
+
+    return new Date(
+        Number(parts[2]),
+        Number(parts[1])-1,
+        Number(parts[0])
+    );
+
+}
+
+
+function drawHistory(){
+
+    const body =
+        document.getElementById("historyBody");
+
+
+    body.innerHTML = "";
+
+
+    const dates =
+        Object.keys(TEST_DATA)
+            .sort(function(a,b){
+
+                return parseDate(b)-parseDate(a);
+
+            })
+            .slice(0,currentRange);
+
+
+    dates.forEach(function(date){
+
+        const data =
+            TEST_DATA[date];
+
+
+        const tr =
+            document.createElement("tr");
+
+
+        const dateC
