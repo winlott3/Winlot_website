@@ -357,7 +357,7 @@ button:disabled{
 
                     <select
                         id="timeInput"
-                        onchange="timeChanged()">
+                        onchange="timeChanged">
 
                         <option value="11 AM">11 AM</option>
                         <option value="1 PM">1 PM</option>
@@ -810,8 +810,6 @@ function timeChanged(){
 
 /* =========================================================
    CHECK EXISTING ENTRY
-   IMPORTANT:
-   Actual Supabase columns are date + time
 ========================================================= */
 
 async function checkExistingEntry(){
@@ -840,8 +838,8 @@ async function checkExistingEntry(){
     } = await db
         .from("Result")
         .select("*")
-        .eq("date",date)
-        .eq("time",time)
+        .eq("result_date",date)
+        .eq("result_time",time)
         .maybeSingle();
 
 
@@ -971,8 +969,8 @@ async function saveEntry(){
                 .from("Result")
                 .update({
 
-                    date:date,
-                    time:time,
+                    result_date:date,
+                    result_time:time,
                     three_digit:threeDigit,
                     two_digit:twoDigit,
                     one_digit:oneDigit
@@ -994,8 +992,8 @@ async function saveEntry(){
         } = await db
             .from("Result")
             .select("id")
-            .eq("date",date)
-            .eq("time",time)
+            .eq("result_date",date)
+            .eq("result_time",time)
             .maybeSingle();
 
 
@@ -1018,8 +1016,8 @@ async function saveEntry(){
                     .from("Result")
                     .update({
 
-                        date:date,
-                        time:time,
+                        result_date:date,
+                        result_time:time,
                         three_digit:threeDigit,
                         two_digit:twoDigit,
                         one_digit:oneDigit
@@ -1039,8 +1037,8 @@ async function saveEntry(){
                     .from("Result")
                     .insert({
 
-                        date:date,
-                        time:time,
+                        result_date:date,
+                        result_time:time,
                         three_digit:threeDigit,
                         two_digit:twoDigit,
                         one_digit:oneDigit
@@ -1141,8 +1139,6 @@ function clearForm(){
 
 /* =========================================================
    LOAD SAVED DATA
-   IMPORTANT:
-   Actual columns are date + time
 ========================================================= */
 
 async function loadSavedData(){
@@ -1163,10 +1159,10 @@ async function loadSavedData(){
     } = await db
         .from("Result")
         .select("*")
-        .order("date",{
+        .order("result_date",{
             ascending:false
         })
-        .order("time",{
+        .order("result_time",{
             ascending:true
         });
 
@@ -1237,7 +1233,7 @@ async function loadSavedData(){
 
         date.textContent =
             formatDisplayDate(
-                item.date
+                item.result_date
             );
 
 
@@ -1252,7 +1248,7 @@ async function loadSavedData(){
 
 
         time.textContent =
-            item.time || "—";
+            item.result_time || "—";
 
 
         top.appendChild(date);
@@ -1349,13 +1345,13 @@ function editEntry(item){
     document.getElementById(
         "dateInput"
     ).value =
-        item.date;
+        item.result_date;
 
 
     document.getElementById(
         "timeInput"
     ).value =
-        item.time;
+        item.result_time;
 
 
     document.getElementById(
