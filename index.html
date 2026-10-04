@@ -656,8 +656,6 @@ document.getElementById("selectedDate").textContent =
 
 /* =========================================
    NORMALIZE TIME
-   Converts different DB time formats
-   into the website's 4 standard times.
 ========================================= */
 
 function normalizeTime(value){
@@ -674,9 +672,7 @@ function normalizeTime(value){
 
     t = t.replace(/\./g,"");
 
-    /*
-       11 AM variations
-    */
+
     if(
         t === "11 AM" ||
         t === "11AM" ||
@@ -687,9 +683,7 @@ function normalizeTime(value){
         return "11 AM";
     }
 
-    /*
-       1 PM variations
-    */
+
     if(
         t === "1 PM" ||
         t === "1PM" ||
@@ -702,9 +696,7 @@ function normalizeTime(value){
         return "1 PM";
     }
 
-    /*
-       5 PM variations
-    */
+
     if(
         t === "5 PM" ||
         t === "5PM" ||
@@ -717,9 +709,7 @@ function normalizeTime(value){
         return "5 PM";
     }
 
-    /*
-       7 PM variations
-    */
+
     if(
         t === "7 PM" ||
         t === "7PM" ||
@@ -749,9 +739,7 @@ function normalizeDate(value){
     const text =
         String(value).trim();
 
-    /*
-       YYYY-MM-DD
-    */
+
     if(/^\d{4}-\d{2}-\d{2}$/.test(text)){
 
         const p =
@@ -766,9 +754,7 @@ function normalizeDate(value){
         );
     }
 
-    /*
-       YYYY-MM-DD with time
-    */
+
     if(text.includes("T")){
 
         const datePart =
@@ -789,9 +775,7 @@ function normalizeDate(value){
         }
     }
 
-    /*
-       Already DD/MM/YYYY
-    */
+
     if(/^\d{2}\/\d{2}\/\d{4}$/.test(text)){
 
         return text;
@@ -812,8 +796,8 @@ async function loadResultData(){
         const url =
             SUPABASE_URL +
             "/rest/v1/Result" +
-            "?select=id,date,time,three_digit,two_digit,one_digit,created_at" +
-            "&order=date.desc,created_at.desc";
+            "?select=id,result_date,result_time,three_digit,two_digit,one_digit,created_at" +
+            "&order=result_date.desc,created_at.desc";
 
 
         console.log(
@@ -874,10 +858,10 @@ async function loadResultData(){
         rows.forEach(function(row){
 
             const displayDate =
-                normalizeDate(row.date);
+                normalizeDate(row.result_date);
 
             const normalizedTime =
-                normalizeTime(row.time);
+                normalizeTime(row.result_time);
 
 
             if(!displayDate || !normalizedTime){
@@ -897,12 +881,6 @@ async function loadResultData(){
 
             }
 
-
-            /*
-               Newest row wins.
-               Query is already ordered by
-               date + created_at descending.
-            */
 
             if(!RESULT_DATA[displayDate][normalizedTime]){
 
@@ -1185,10 +1163,6 @@ function drawHistory(){
 
     body.innerHTML = "";
 
-
-    /*
-       Sort every date newest → oldest
-    */
 
     const dates =
         Object.keys(RESULT_DATA)
