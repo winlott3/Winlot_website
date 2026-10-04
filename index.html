@@ -582,7 +582,7 @@ const SUPABASE_KEY =
 
 
 /* =========================================
-   LIVE DATA STORAGE
+   DATA
 ========================================= */
 
 let RESULT_DATA = {};
@@ -593,7 +593,7 @@ let currentRange = 5;
 
 
 /* =========================================
-   DATE FUNCTIONS
+   DATE
 ========================================= */
 
 function formatDate(date){
@@ -608,7 +608,6 @@ function formatDate(date){
         date.getFullYear();
 
     return day+"/"+month+"/"+year;
-
 }
 
 
@@ -620,7 +619,6 @@ function formatDay(date){
             weekday:"long"
         }
     );
-
 }
 
 
@@ -634,7 +632,6 @@ function parseDate(dateString){
         Number(parts[1])-1,
         Number(parts[0])
     );
-
 }
 
 
@@ -647,7 +644,6 @@ const today = new Date();
 const todayString =
     formatDate(today);
 
-
 document.getElementById("homeDateText").textContent =
     todayString;
 
@@ -659,7 +655,154 @@ document.getElementById("selectedDate").textContent =
 
 
 /* =========================================
-   FETCH DATA FROM SUPABASE
+   NORMALIZE TIME
+   Converts different DB time formats
+   into the website's 4 standard times.
+========================================= */
+
+function normalizeTime(value){
+
+    if(value === null || value === undefined){
+        return "";
+    }
+
+    let t =
+        String(value)
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g," ");
+
+    t = t.replace(/\./g,"");
+
+    /*
+       11 AM variations
+    */
+    if(
+        t === "11 AM" ||
+        t === "11AM" ||
+        t === "11:00 AM" ||
+        t === "11:00AM" ||
+        t === "11:00"
+    ){
+        return "11 AM";
+    }
+
+    /*
+       1 PM variations
+    */
+    if(
+        t === "1 PM" ||
+        t === "1PM" ||
+        t === "01 PM" ||
+        t === "01PM" ||
+        t === "1:00 PM" ||
+        t === "1:00PM" ||
+        t === "13:00"
+    ){
+        return "1 PM";
+    }
+
+    /*
+       5 PM variations
+    */
+    if(
+        t === "5 PM" ||
+        t === "5PM" ||
+        t === "05 PM" ||
+        t === "05PM" ||
+        t === "5:00 PM" ||
+        t === "5:00PM" ||
+        t === "17:00"
+    ){
+        return "5 PM";
+    }
+
+    /*
+       7 PM variations
+    */
+    if(
+        t === "7 PM" ||
+        t === "7PM" ||
+        t === "07 PM" ||
+        t === "07PM" ||
+        t === "7:00 PM" ||
+        t === "7:00PM" ||
+        t === "19:00"
+    ){
+        return "7 PM";
+    }
+
+    return t;
+}
+
+
+/* =========================================
+   NORMALIZE DATE
+========================================= */
+
+function normalizeDate(value){
+
+    if(!value){
+        return "";
+    }
+
+    const text =
+        String(value).trim();
+
+    /*
+       YYYY-MM-DD
+    */
+    if(/^\d{4}-\d{2}-\d{2}$/.test(text)){
+
+        const p =
+            text.split("-");
+
+        return (
+            p[2] +
+            "/" +
+            p[1] +
+            "/" +
+            p[0]
+        );
+    }
+
+    /*
+       YYYY-MM-DD with time
+    */
+    if(text.includes("T")){
+
+        const datePart =
+            text.split("T")[0];
+
+        if(/^\d{4}-\d{2}-\d{2}$/.test(datePart)){
+
+            const p =
+                datePart.split("-");
+
+            return (
+                p[2] +
+                "/" +
+                p[1] +
+                "/" +
+                p[0]
+            );
+        }
+    }
+
+    /*
+       Already DD/MM/YYYY
+    */
+    if(/^\d{2}\/\d{2}\/\d{4}$/.test(text)){
+
+        return text;
+    }
+
+    return "";
+}
+
+
+/* =========================================
+   FETCH SUPABASE DATA
 ========================================= */
 
 async function loadResultData(){
@@ -673,6 +816,11 @@ async function loadResultData(){
             "&order=date.desc,created_at.desc";
 
 
+        console.log(
+            "Loading WIN LOT data from Supabase..."
+        );
+
+
         const response =
             await fetch(
                 url,
@@ -681,8 +829,12 @@ async function loadResultData(){
 
                     headers:{
                         "apikey":SUPABASE_KEY,
+
                         "Authorization":
-                            "Bearer "+SUPABASE_KEY,
+                            "Bearer " + SUPABASE_KEY,
+
+                        "Accept":
+                            "application/json",
 
                         "Content-Type":
                             "application/json"
@@ -698,11 +850,11 @@ async function loadResultData(){
 
             console.error(
                 "Supabase Error:",
+                response.status,
                 errorText
             );
 
             return;
-
         }
 
 
@@ -710,35 +862,33 @@ async function loadResultData(){
             await response.json();
 
 
+        console.log(
+            "Supabase rows received:",
+            rows.length
+        );
+
+
         RESULT_DATA = {};
 
 
         rows.forEach(function(row){
 
-            if(!row.date || !row.time){
-
-                return;
-
-            }
-
-
-            const dateParts =
-                String(row.date).split("-");
-
-
-            if(dateParts.length !== 3){
-
-                return;
-
-            }
-
-
             const displayDate =
-                dateParts[2] +
-                "/" +
-                dateParts[1] +
-                "/" +
-                dateParts[0];
+                normalizeDate(row.date);
+
+            const normalizedTime =
+                normalizeTime(row.time);
+
+
+            if(!displayDate || !normalizedTime){
+
+                console.warn(
+                    "Skipped row:",
+                    row
+                );
+
+                return;
+            }
 
 
             if(!RESULT_DATA[displayDate]){
@@ -748,20 +898,42 @@ async function loadResultData(){
             }
 
 
-            RESULT_DATA[displayDate][row.time] = {
+            /*
+               Newest row wins.
+               Query is already ordered by
+               date + created_at descending.
+            */
 
-                three_digit:
-                    row.three_digit || "",
+            if(!RESULT_DATA[displayDate][normalizedTime]){
 
-                two_digit:
-                    row.two_digit || "",
+                RESULT_DATA[displayDate][normalizedTime] = {
 
-                one_digit:
-                    row.one_digit || ""
+                    three_digit:
+                        row.three_digit === null
+                            ? ""
+                            : String(row.three_digit),
 
-            };
+                    two_digit:
+                        row.two_digit === null
+                            ? ""
+                            : String(row.two_digit),
+
+                    one_digit:
+                        row.one_digit === null
+                            ? ""
+                            : String(row.one_digit)
+
+                };
+
+            }
 
         });
+
+
+        console.log(
+            "WIN LOT RESULT_DATA:",
+            RESULT_DATA
+        );
 
 
         selectTime(selectedTime);
@@ -772,7 +944,7 @@ async function loadResultData(){
     }catch(error){
 
         console.error(
-            "Unable to load Supabase data:",
+            "Supabase connection error:",
             error
         );
 
@@ -838,7 +1010,6 @@ function selectTime(time){
     document.getElementById("selectedTime").textContent =
         time;
 
-
     document.getElementById("selectedDate").textContent =
         todayString;
 
@@ -897,7 +1068,6 @@ function downloadResult(){
         );
 
         return;
-
     }
 
 
@@ -1010,12 +1180,15 @@ function drawHistory(){
     if(!body){
 
         return;
-
     }
 
 
     body.innerHTML = "";
 
+
+    /*
+       Sort every date newest → oldest
+    */
 
     const dates =
         Object.keys(RESULT_DATA)
@@ -1164,7 +1337,6 @@ selectTime("11 AM");
 drawHistory();
 
 loadResultData();
-
 
 </script>
 
