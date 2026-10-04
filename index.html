@@ -415,7 +415,7 @@ body{
                 </div>
 
                 <div class="resultDate" id="selectedDate">
-                    03/10/2026
+                    —
                 </div>
 
             </div>
@@ -430,7 +430,7 @@ body{
                     </td>
 
                     <td class="resultValue" id="threeDigit">
-                        428
+                        —
                     </td>
 
                 </tr>
@@ -442,7 +442,7 @@ body{
                     </td>
 
                     <td class="resultValue" id="twoDigit">
-                        28
+                        —
                     </td>
 
                 </tr>
@@ -454,7 +454,7 @@ body{
                     </td>
 
                     <td class="resultValue" id="oneDigit">
-                        8
+                        —
                     </td>
 
                 </tr>
@@ -570,115 +570,31 @@ body{
 
 <script>
 
-const TEST_DATA = {
+/* =========================================
+   SUPABASE CONNECTION
+========================================= */
 
-    "03/10/2026":{
-        "11 AM":"428",
-        "1 PM":"315",
-        "5 PM":"672",
-        "7 PM":"901"
-    },
+const SUPABASE_URL =
+    "https://nlrfzuqpaiifvkvxwvho.supabase.co";
 
-    "02/10/2026":{
-        "11 AM":"123",
-        "1 PM":"456",
-        "5 PM":"",
-        "7 PM":"789"
-    },
+const SUPABASE_KEY =
+    "sb_publishable_0iZhQxmZWXY9uiBi5jjuxw_TaXZ_iAq";
 
-    "01/10/2026":{
-        "11 AM":"781",
-        "1 PM":"",
-        "5 PM":"234",
-        "7 PM":"890"
-    },
 
-    "30/09/2026":{
-        "11 AM":"345",
-        "1 PM":"678",
-        "5 PM":"901",
-        "7 PM":"234"
-    },
+/* =========================================
+   LIVE DATA STORAGE
+========================================= */
 
-    "29/09/2026":{
-        "11 AM":"512",
-        "1 PM":"347",
-        "5 PM":"826",
-        "7 PM":"109"
-    },
+let RESULT_DATA = {};
 
-    "28/09/2026":{
-        "11 AM":"690",
-        "1 PM":"214",
-        "5 PM":"735",
-        "7 PM":"468"
-    },
+let selectedTime = "11 AM";
 
-    "27/09/2026":{
-        "11 AM":"157",
-        "1 PM":"803",
-        "5 PM":"426",
-        "7 PM":"591"
-    },
+let currentRange = 5;
 
-    "26/09/2026":{
-        "11 AM":"934",
-        "1 PM":"562",
-        "5 PM":"178",
-        "7 PM":"340"
-    },
 
-    "25/09/2026":{
-        "11 AM":"246",
-        "1 PM":"719",
-        "5 PM":"503",
-        "7 PM":"864"
-    },
-
-    "24/09/2026":{
-        "11 AM":"381",
-        "1 PM":"625",
-        "5 PM":"947",
-        "7 PM":"210"
-    },
-
-    "23/09/2026":{
-        "11 AM":"704",
-        "1 PM":"138",
-        "5 PM":"592",
-        "7 PM":"463"
-    },
-
-    "22/09/2026":{
-        "11 AM":"829",
-        "1 PM":"351",
-        "5 PM":"640",
-        "7 PM":"275"
-    },
-
-    "21/09/2026":{
-        "11 AM":"416",
-        "1 PM":"982",
-        "5 PM":"307",
-        "7 PM":"651"
-    },
-
-    "20/09/2026":{
-        "11 AM":"573",
-        "1 PM":"240",
-        "5 PM":"816",
-        "7 PM":"394"
-    },
-
-    "19/09/2026":{
-        "11 AM":"168",
-        "1 PM":"537",
-        "5 PM":"429",
-        "7 PM":"780"
-    }
-
-};
-
+/* =========================================
+   DATE FUNCTIONS
+========================================= */
 
 function formatDate(date){
 
@@ -708,6 +624,24 @@ function formatDay(date){
 }
 
 
+function parseDate(dateString){
+
+    const parts =
+        dateString.split("/");
+
+    return new Date(
+        Number(parts[2]),
+        Number(parts[1])-1,
+        Number(parts[0])
+    );
+
+}
+
+
+/* =========================================
+   TODAY
+========================================= */
+
 const today = new Date();
 
 const todayString =
@@ -724,8 +658,132 @@ document.getElementById("selectedDate").textContent =
     todayString;
 
 
-let selectedTime = "11 AM";
+/* =========================================
+   FETCH DATA FROM SUPABASE
+========================================= */
 
+async function loadResultData(){
+
+    try{
+
+        const url =
+            SUPABASE_URL +
+            "/rest/v1/Result" +
+            "?select=id,date,time,three_digit,two_digit,one_digit,created_at" +
+            "&order=date.desc,created_at.desc";
+
+
+        const response =
+            await fetch(
+                url,
+                {
+                    method:"GET",
+
+                    headers:{
+                        "apikey":SUPABASE_KEY,
+                        "Authorization":
+                            "Bearer "+SUPABASE_KEY,
+
+                        "Content-Type":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        if(!response.ok){
+
+            const errorText =
+                await response.text();
+
+            console.error(
+                "Supabase Error:",
+                errorText
+            );
+
+            return;
+
+        }
+
+
+        const rows =
+            await response.json();
+
+
+        RESULT_DATA = {};
+
+
+        rows.forEach(function(row){
+
+            if(!row.date || !row.time){
+
+                return;
+
+            }
+
+
+            const dateParts =
+                String(row.date).split("-");
+
+
+            if(dateParts.length !== 3){
+
+                return;
+
+            }
+
+
+            const displayDate =
+                dateParts[2] +
+                "/" +
+                dateParts[1] +
+                "/" +
+                dateParts[0];
+
+
+            if(!RESULT_DATA[displayDate]){
+
+                RESULT_DATA[displayDate] = {};
+
+            }
+
+
+            RESULT_DATA[displayDate][row.time] = {
+
+                three_digit:
+                    row.three_digit || "",
+
+                two_digit:
+                    row.two_digit || "",
+
+                one_digit:
+                    row.one_digit || ""
+
+            };
+
+        });
+
+
+        selectTime(selectedTime);
+
+        drawHistory();
+
+
+    }catch(error){
+
+        console.error(
+            "Unable to load Supabase data:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   SELECT TIME
+========================================= */
 
 function selectTime(time){
 
@@ -780,29 +838,34 @@ function selectTime(time){
     document.getElementById("selectedTime").textContent =
         time;
 
+
     document.getElementById("selectedDate").textContent =
         todayString;
 
 
+    const dateData =
+        RESULT_DATA[todayString] || {};
+
+
     const data =
-        TEST_DATA[todayString] || {};
+        dateData[time] || {};
 
 
     const three =
-        data[time] || "—";
+        data.three_digit || "—";
 
 
     document.getElementById("threeDigit").textContent =
         three;
 
 
-    if(three !== "—"){
+    if(three !== "—" && three !== ""){
 
         document.getElementById("twoDigit").textContent =
-            three.slice(-2);
+            data.two_digit || three.slice(-2);
 
         document.getElementById("oneDigit").textContent =
-            three.slice(-1);
+            data.one_digit || three.slice(-1);
 
     }else{
 
@@ -816,6 +879,10 @@ function selectTime(time){
 
 }
 
+
+/* =========================================
+   DOWNLOAD RESULT
+========================================= */
 
 function downloadResult(){
 
@@ -879,6 +946,10 @@ function downloadResult(){
 }
 
 
+/* =========================================
+   PAGE NAVIGATION
+========================================= */
+
 function showPage(pageId,button){
 
     document
@@ -926,23 +997,9 @@ function showPage(pageId,button){
 }
 
 
-let currentRange = 5;
-
-
-function parseDate(dateString){
-
-    const parts =
-        dateString.split("/");
-
-
-    return new Date(
-        Number(parts[2]),
-        Number(parts[1])-1,
-        Number(parts[0])
-    );
-
-}
-
+/* =========================================
+   HISTORY
+========================================= */
 
 function drawHistory(){
 
@@ -961,7 +1018,7 @@ function drawHistory(){
 
 
     const dates =
-        Object.keys(TEST_DATA)
+        Object.keys(RESULT_DATA)
             .sort(function(a,b){
 
                 return parseDate(b)-parseDate(a);
@@ -973,7 +1030,7 @@ function drawHistory(){
     dates.forEach(function(date){
 
         const data =
-            TEST_DATA[date] || {};
+            RESULT_DATA[date] || {};
 
 
         const tr =
@@ -991,47 +1048,86 @@ function drawHistory(){
         tr.appendChild(dateCell);
 
 
-        ["11 AM","1 PM","5 PM","7 PM"]
-            .forEach(function(time){
+        [
+            "11 AM",
+            "1 PM",
+            "5 PM",
+            "7 PM"
+        ]
+        .forEach(function(time){
 
-                const td =
-                    document.createElement("td");
-
-
-                const value =
-                    data[time] || "";
-
-
-                if(value){
-
-                    td.textContent =
-                        value;
-
-                    td.className =
-                        "resultCell";
-
-                }else{
-
-                    td.textContent =
-                        "—";
-
-                    td.className =
-                        "empty";
-
-                }
+            const td =
+                document.createElement("td");
 
 
-                tr.appendChild(td);
+            const timeData =
+                data[time] || {};
 
-            });
+
+            const value =
+                timeData.three_digit || "";
+
+
+            if(value){
+
+                td.textContent =
+                    value;
+
+                td.className =
+                    "resultCell";
+
+            }else{
+
+                td.textContent =
+                    "—";
+
+                td.className =
+                    "empty";
+
+            }
+
+
+            tr.appendChild(td);
+
+        });
 
 
         body.appendChild(tr);
 
     });
 
+
+    if(dates.length === 0){
+
+        const tr =
+            document.createElement("tr");
+
+
+        const td =
+            document.createElement("td");
+
+
+        td.colSpan = 5;
+
+        td.textContent =
+            "No result data available";
+
+        td.className =
+            "empty";
+
+
+        tr.appendChild(td);
+
+        body.appendChild(tr);
+
+    }
+
 }
 
+
+/* =========================================
+   RANGE
+========================================= */
 
 function setRange(range,button){
 
@@ -1059,11 +1155,16 @@ function setRange(range,button){
 }
 
 
-/* INITIAL LOAD */
+/* =========================================
+   INITIAL LOAD
+========================================= */
 
 selectTime("11 AM");
 
 drawHistory();
+
+loadResultData();
+
 
 </script>
 
