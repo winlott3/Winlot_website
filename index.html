@@ -655,6 +655,53 @@ document.getElementById("selectedDate").textContent =
 
 
 /* =========================================
+   TIME VISIBILITY
+   TODAY'S FUTURE RESULTS ARE HIDDEN
+========================================= */
+
+function isTimeReleased(time){
+
+    const now = new Date();
+
+    const currentHour =
+        now.getHours();
+
+    const currentMinute =
+        now.getMinutes();
+
+    let releaseHour = 0;
+
+    if(time === "11 AM"){
+        releaseHour = 11;
+    }
+
+    else if(time === "1 PM"){
+        releaseHour = 13;
+    }
+
+    else if(time === "5 PM"){
+        releaseHour = 17;
+    }
+
+    else if(time === "7 PM"){
+        releaseHour = 19;
+    }
+
+    else{
+        return true;
+    }
+
+    const currentTotalMinutes =
+        currentHour * 60 + currentMinute;
+
+    const releaseTotalMinutes =
+        releaseHour * 60;
+
+    return currentTotalMinutes >= releaseTotalMinutes;
+}
+
+
+/* =========================================
    NORMALIZE TIME
 ========================================= */
 
@@ -992,6 +1039,26 @@ function selectTime(time){
         todayString;
 
 
+    /* =====================================
+       NEW TIME LOCK
+       TODAY'S FUTURE TIME = HIDDEN
+    ===================================== */
+
+    if(!isTimeReleased(time)){
+
+        document.getElementById("threeDigit").textContent =
+            "—";
+
+        document.getElementById("twoDigit").textContent =
+            "—";
+
+        document.getElementById("oneDigit").textContent =
+            "—";
+
+        return;
+    }
+
+
     const dateData =
         RESULT_DATA[todayString] || {};
 
@@ -1081,238 +1148,4 @@ function downloadResult(){
             canvas.toDataURL("image/png");
 
 
-        link.click();
-
-    }).catch(function(){
-
-        alert(
-            "Unable to create image. Please try again."
-        );
-
-    });
-
-}
-
-
-/* =========================================
-   PAGE NAVIGATION
-========================================= */
-
-function showPage(pageId,button){
-
-    document
-        .querySelectorAll(".page")
-        .forEach(function(page){
-
-            page.classList.remove("active");
-
-        });
-
-
-    const selectedPage =
-        document.getElementById(pageId);
-
-
-    if(selectedPage){
-
-        selectedPage.classList.add("active");
-
-    }
-
-
-    document
-        .querySelectorAll(".nav button")
-        .forEach(function(btn){
-
-            btn.classList.remove("active");
-
-        });
-
-
-    if(button){
-
-        button.classList.add("active");
-
-    }
-
-
-    if(pageId === "result"){
-
-        drawHistory();
-
-    }
-
-}
-
-
-/* =========================================
-   HISTORY
-========================================= */
-
-function drawHistory(){
-
-    const body =
-        document.getElementById("historyBody");
-
-
-    if(!body){
-
-        return;
-    }
-
-
-    body.innerHTML = "";
-
-
-    const dates =
-        Object.keys(RESULT_DATA)
-            .sort(function(a,b){
-
-                return parseDate(b)-parseDate(a);
-
-            })
-            .slice(0,currentRange);
-
-
-    dates.forEach(function(date){
-
-        const data =
-            RESULT_DATA[date] || {};
-
-
-        const tr =
-            document.createElement("tr");
-
-
-        const dateCell =
-            document.createElement("td");
-
-
-        dateCell.textContent =
-            date;
-
-
-        tr.appendChild(dateCell);
-
-
-        [
-            "11 AM",
-            "1 PM",
-            "5 PM",
-            "7 PM"
-        ]
-        .forEach(function(time){
-
-            const td =
-                document.createElement("td");
-
-
-            const timeData =
-                data[time] || {};
-
-
-            const value =
-                timeData.three_digit || "";
-
-
-            if(value){
-
-                td.textContent =
-                    value;
-
-                td.className =
-                    "resultCell";
-
-            }else{
-
-                td.textContent =
-                    "—";
-
-                td.className =
-                    "empty";
-
-            }
-
-
-            tr.appendChild(td);
-
-        });
-
-
-        body.appendChild(tr);
-
-    });
-
-
-    if(dates.length === 0){
-
-        const tr =
-            document.createElement("tr");
-
-
-        const td =
-            document.createElement("td");
-
-
-        td.colSpan = 5;
-
-        td.textContent =
-            "No result data available";
-
-        td.className =
-            "empty";
-
-
-        tr.appendChild(td);
-
-        body.appendChild(tr);
-
-    }
-
-}
-
-
-/* =========================================
-   RANGE
-========================================= */
-
-function setRange(range,button){
-
-    currentRange = range;
-
-
-    document
-        .querySelectorAll(".rangeButtons button")
-        .forEach(function(btn){
-
-            btn.classList.remove("active");
-
-        });
-
-
-    if(button){
-
-        button.classList.add("active");
-
-    }
-
-
-    drawHistory();
-
-}
-
-
-/* =========================================
-   INITIAL LOAD
-========================================= */
-
-selectTime("11 AM");
-
-drawHistory();
-
-loadResultData();
-
-</script>
-
-</body>
-</html>
+   
